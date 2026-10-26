@@ -49,4 +49,4 @@ Then in Blueprint:
 
 HaloKey is an independent community project, not affiliated with, endorsed by, or supported by Kwikset or Savant Systems, Inc. It uses the same cloud service as the Kwikset app, which Kwikset doesn't publish or support for third parties, so a Kwikset change could break it. A door lock is a security device: test your setup, and keep a key or code that works without Savant.
 
-Built on [aiokwikset](https://github.com/explosivo22/aiokwikset) by Brad Barbour (Apache License 2.0). HaloKey itself is MIT licensed.
+HaloKey is MIT licensed (see [LICENSE](LICENSE)). It's built on [aiokwikset](https://github.com/explosivo22/aiokwikset) by Brad Barbour (Apache License 2.0). The wheel in `vendor/` is aiokwikset 0.7.3 with one change for Python 3.9 (deferred annotations, no change in behaviour); each changed file says so, and the Apache license is inside the wheel. `vendor/make_py39_wheel.py` rebuilds it from the original.
