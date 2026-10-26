@@ -1,0 +1,25 @@
+# Savant HaloLink on Linux (e.g. a Raspberry Pi). Setup:
+#   sudo mkdir -p /opt/halolink && sudo chown pi /opt/halolink
+#   cp bridge/halolink_bridge.py bridge/config.json /opt/halolink/
+#   python3 -m venv /opt/halolink/venv
+#   /opt/halolink/venv/bin/pip install "aiohttp>=3.8" "pycognito>=2024.5.1" "attrs>=21.0.0" boto3
+#   /opt/halolink/venv/bin/pip install --no-deps vendor/aiokwikset-*.whl
+#   /opt/halolink/venv/bin/python /opt/halolink/halolink_bridge.py -c /opt/halolink/config.json --login
+#   sudo cp linux/halolink-bridge.service /etc/systemd/system/ && sudo systemctl enable --now halolink-bridge
+[Unit]
+Description=Savant HaloLink Kwikset bridge
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/opt/halolink
+ExecStart=/opt/halolink/venv/bin/python /opt/halolink/halolink_bridge.py -c /opt/halolink/config.json
+KillSignal=SIGTERM
+TimeoutStopSec=15
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

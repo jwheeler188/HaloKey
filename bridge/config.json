@@ -1,0 +1,14 @@
+{
+  "_readme": "Savant HaloLink bridge settings. After editing: sudo halolink restart",
+  "tcp_port": 2370,
+  "max_locks": 8,
+  "poll_seconds": 300,
+  "realtime": true,
+  "home": "",
+  "lock_order": [],
+  "allowed_clients": "auto",
+  "allow_remote_unlock": true,
+  "battery_low_percent": 20,
+  "confirm_seconds": 45,
+  "log_level": "INFO"
+}

@@ -1,0 +1,157 @@
+#!/bin/bash
+# zsh is the macOS default shell: if started with "zsh file" or "sh file", relaunch in bash
+[ -n "${BASH_VERSION:-}" ] || exec /bin/bash "$0" "$@"
+# halolink - control the Savant HaloLink (Kwikset) service on macOS
+#
+#   halolink status          service state, sign-in, every lock's status
+#   halolink login           sign in to Kwikset (email, password, then the code Kwikset sends)
+#   halolink list            locks and their Savant numbers
+#   halolink dump 2          raw Kwikset data for lock 2 (for troubleshooting)
+#   halolink lock 2          test from Terminal: lock / unlock lock 2 through the running bridge
+#   halolink unlock 2
+#   halolink refresh         ask Kwikset for fresh status now
+#   halolink logs            follow the log (Ctrl-C to quit)
+#   sudo halolink stop       clean shutdown; stays stopped until start or reboot
+#   sudo halolink start
+#   sudo halolink restart
+#   sudo halolink disable    stop and don't start at boot
+#   sudo halolink enable     start at boot again (and start now)
+#   sudo halolink uninstall  remove everything (add --keep-config to save config + sign-in first)
+set -uo pipefail
+
+LABEL="org.halolink.bridge"
+PLIST="/Library/LaunchDaemons/${LABEL}.plist"
+SELF="$0"; [ -L "$SELF" ] && SELF="$(readlink "$SELF")"
+DIR="$(cd "$(dirname "$SELF")" && pwd)"
+LOG="$DIR/logs/bridge.log"
+VPY="$DIR/venv/bin/python3"
+
+RUN_USER="$(sed -n 's/^RUN_USER=//p' "$DIR/.install-manifest" 2>/dev/null | head -1)"
+RUN_USER="${RUN_USER:-$(id -un)}"
+cfg() { /usr/bin/python3 -c "import json;print(json.load(open('$DIR/config.json')).get('$1','$2'))" 2>/dev/null || echo "$2"; }
+TCP_PORT="$(cfg tcp_port 2370)"
+
+need_root() { [ "$(id -u)" -eq 0 ] || { echo "run with sudo: sudo halolink $1"; exit 1; }; }
+loaded()    { launchctl print "system/$LABEL" >/dev/null 2>&1; }
+pid()       { launchctl print "system/$LABEL" 2>/dev/null | awk '/^\tpid = /{print $3}'; }
+# run the bridge CLI as the service user, so tokens.json stays owned by (and private to) that user
+as_svc() {
+  if [ "$(id -un)" = "$RUN_USER" ]; then "$@"
+  elif [ "$(id -u)" -eq 0 ]; then sudo -u "$RUN_USER" -H "$@"
+  else echo "run as $RUN_USER (or with sudo)"; exit 1; fi
+}
+
+# send one line to the running bridge; print what it sends back for ~1.5 s
+talk() {
+  /usr/bin/python3 - "$TCP_PORT" "$1" <<'PY'
+import socket, sys, time
+port, line = int(sys.argv[1]), sys.argv[2]
+try:
+    s = socket.create_connection(("127.0.0.1", port), 3)
+except OSError as e:
+    print("bridge not reachable on port %d: %s" % (port, e)); sys.exit(1)
+if line:
+    s.sendall((line + "\n").encode())
+s.settimeout(0.3); buf = b""; end = time.time() + 1.5
+while time.time() < end:
+    try:
+        d = s.recv(65536)
+        if not d: break
+        buf += d
+    except socket.timeout:
+        pass
+sys.stdout.write(buf.decode("ascii", "replace"))
+PY
+}
+
+wait_gone() {
+  for _ in $(seq 1 20); do
+    lsof -nP -iTCP:"$TCP_PORT" -sTCP:LISTEN >/dev/null 2>&1 || return 0
+    sleep 1
+  done
+  echo "warning: still listening on $TCP_PORT after 20s"
+}
+
+case "${1:-status}" in
+  status)
+    if ! [ -f "$PLIST" ]; then echo "not installed"; exit 1; fi
+    if loaded; then
+      p="$(pid)"
+      if [ -n "$p" ]; then
+        mem=$(( $(ps -o rss= -p "$p" 2>/dev/null || echo 0) / 1024 ))
+        up="$(ps -o etime= -p "$p" 2>/dev/null | tr -d ' ')"
+        echo "running   pid $p   memory ${mem} MB   uptime $up"
+        echo "version   v$(sed -n 's/^VERSION = "\(.*\)"/\1/p' "$DIR/halolink_bridge.py" | head -1)   ($DIR)"
+      else
+        echo "loaded but not running (crashed or throttled - see: halolink logs)"
+      fi
+    else
+      echo "stopped"
+    fi
+    launchctl print-disabled system 2>/dev/null | grep -Eq "\"$LABEL\" => (true|disabled)" && echo "autostart disabled"
+    talk "" | /usr/bin/python3 -c '
+import sys
+v = dict(l.split("=", 1) for l in sys.stdin.read().splitlines() if "=" in l)
+if not v: sys.exit()
+print("kwikset   auth={}  online={}  live push={}  account={}".format(v.get("SYS_AUTH"), v.get("SYS_ONLINE"), v.get("SYS_LIVE"), v.get("SYS_ACCOUNT") or "-"))
+print("updated   {}".format(v.get("SYS_LAST_UPDATE") or "never"))
+if v.get("SYS_ERROR"): print("error     " + v["SYS_ERROR"])
+n = 1
+while "LOCK%d_PRESENT" % n in v:
+    if v["LOCK%d_PRESENT" % n] == "1":
+        g = lambda f: v.get("LOCK%d_%s" % (n, f), "")
+        extra = "  door " + g("DOOR") if g("DOOR") != "Unknown" else ""
+        extra += "  OFFLINE" if g("ONLINE") == "0" else ""
+        extra += ("  " + g("PENDING")) if g("PENDING") else ""
+        extra += ("  ERROR: " + g("ERROR")) if g("ERROR") else ""
+        print("lock {:<2}   {:<22} {:<9} battery {:>3}%{}".format(n, g("NAME"), g("STATUS"), g("BATTERY"), extra))
+    n += 1
+if v.get("SYS_LAST_COMMAND"): print("last cmd  " + v["SYS_LAST_COMMAND"])'
+    ;;
+  login)   shift; as_svc "$VPY" "$DIR/halolink_bridge.py" -c "$DIR/config.json" --login "$@" ;;
+  list)    as_svc "$VPY" "$DIR/halolink_bridge.py" -c "$DIR/config.json" --list ;;
+  dump)    [ -n "${2:-}" ] || { echo "usage: halolink dump <lock number>"; exit 1; }
+           as_svc "$VPY" "$DIR/halolink_bridge.py" -c "$DIR/config.json" --list --dump "$2" ;;
+  lock|unlock)
+    [ -n "${2:-}" ] || { echo "usage: halolink $1 <lock number>"; exit 1; }
+    U="$(echo "$1" | tr a-z A-Z)"
+    talk "$U $2" >/dev/null; echo "$U $2 sent - watching for confirmation..."; sleep 6; "$SELF" status | grep -E "^lock $2 |^last cmd" ;;
+  refresh) talk "REFRESH" >/dev/null && echo "refresh requested" ;;
+  logs)    tail -n 50 -f "$LOG" ;;
+  stop)
+    need_root stop
+    loaded || { echo "already stopped"; exit 0; }
+    launchctl bootout "system/$LABEL" && wait_gone && echo "stopped"
+    ;;
+  start)
+    need_root start
+    loaded && { echo "already running"; exit 0; }
+    launchctl enable "system/$LABEL"
+    launchctl bootstrap system "$PLIST" && echo "started"
+    ;;
+  restart)
+    need_root restart
+    if loaded; then launchctl bootout "system/$LABEL"; wait_gone; fi
+    launchctl enable "system/$LABEL"
+    launchctl bootstrap system "$PLIST" && echo "restarted"
+    ;;
+  disable)
+    need_root disable
+    loaded && { launchctl bootout "system/$LABEL"; wait_gone; }
+    launchctl disable "system/$LABEL" && echo "stopped and disabled at boot"
+    ;;
+  enable)
+    need_root enable
+    launchctl enable "system/$LABEL"
+    loaded || launchctl bootstrap system "$PLIST"
+    echo "enabled and running"
+    ;;
+  uninstall)
+    need_root uninstall
+    shift; exec "$DIR/uninstall.sh" "$@"
+    ;;
+  *)
+    sed -n '/^# halolink - /,/^set -uo/p' "$SELF" | grep '^#' | sed 's/^# \{0,1\}//'
+    exit 1
+    ;;
+esac

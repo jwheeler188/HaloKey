@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- HaloKey profile icon: a generic touchscreen deadbolt (no Kwikset artwork).
+       make_icon.sh turns this into kwikset_halolink.icns. -->
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5b6066"/>
+      <stop offset="0.5" stop-color="#34383d"/>
+      <stop offset="1" stop-color="#1e2124"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c9ccd0"/>
+      <stop offset="1" stop-color="#7d8186"/>
+    </linearGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14171a"/>
+      <stop offset="1" stop-color="#0a0b0d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7fd4ff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7fd4ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- escutcheon -->
+  <rect x="282" y="72" width="460" height="880" rx="150" fill="url(#rim)"/>
+  <rect x="300" y="90" width="424" height="844" rx="134" fill="url(#body)"/>
+  <!-- touchscreen -->
+  <rect x="348" y="150" width="328" height="470" rx="56" fill="url(#screen)"/>
+  <g fill="#8fdcff">
+    <circle cx="430" cy="236" r="26"/><circle cx="512" cy="236" r="26"/><circle cx="594" cy="236" r="26"/>
+    <circle cx="430" cy="330" r="26"/><circle cx="512" cy="330" r="26"/><circle cx="594" cy="330" r="26"/>
+    <circle cx="430" cy="424" r="26"/><circle cx="512" cy="424" r="26"/><circle cx="594" cy="424" r="26"/>
+    <circle cx="512" cy="518" r="26"/>
+  </g>
+  <!-- halo ring + keyway -->
+  <circle cx="512" cy="770" r="118" fill="url(#glow)"/>
+  <circle cx="512" cy="770" r="92" fill="none" stroke="#8fdcff" stroke-width="16"/>
+  <circle cx="512" cy="770" r="66" fill="url(#rim)"/>
+  <rect x="502" y="726" width="20" height="88" rx="10" fill="#2a2d31"/>
+  <!-- Wi-Fi badge -->
+  <circle cx="742" cy="160" r="104" fill="#1f8fe0" stroke="#ffffff" stroke-width="16"/>
+  <g fill="none" stroke="#ffffff" stroke-width="20" stroke-linecap="round">
+    <path d="M684 164 a84 84 0 0 1 116 0"/>
+    <path d="M708 190 a48 48 0 0 1 68 0"/>
+  </g>
+  <circle cx="742" cy="214" r="13" fill="#ffffff"/>
+</svg>

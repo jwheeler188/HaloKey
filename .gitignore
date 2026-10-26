@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.DS_Store
+# runtime files the bridge writes next to itself
+tokens.json
+locks.json
+settings.json
+logs/
+*.log
+screenlog.*
+# private development notes (host details)
+HANDOFF.md
+# test profile, built on demand with generate_profile.py --test
+profile/kwikset_halolinktest.xml
