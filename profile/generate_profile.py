@@ -3,8 +3,9 @@
 Generates the Savant Blueprint component profile from the bridge's state
 definitions, so the profile's status parsers always match what the bridge sends.
 
-    python3 generate_profile.py              -> blueprint-import/: kwikset_halolink.xml (8 lock slots) and
-                                                the Documentation tab page, built from MANUAL.md + STATES.md
+    python3 generate_profile.py              -> blueprint-import/: kwikset_halolink.xml (8 lock slots),
+                                                kwikset_halolink.htm (Documentation tab page, from MANUAL.md + STATES.md)
+                                                and kwikset_halolink.icns side by side
     python3 generate_profile.py --locks 12   -> more slots (set max_locks in config.json to match)
     python3 generate_profile.py --test       -> also kwikset_halolinktest.xml (tiny, for import troubleshooting)
 
@@ -39,8 +40,9 @@ MODEL = "HaloLink"
 LC = "DoorLock"
 PORT = DEFAULT_CONFIG["tcp_port"]
 ROOT = HERE.parent
-# Blueprint's import layout: import componentProfiles/<name>.xml from here and Blueprint copies the
-# Documentation tab page and the icon from the folders beside it.
+# Blueprint's import package: <name>.xml, <name>.htm and <name>.icns in ONE folder. On import, Blueprint
+# copies the .htm and .icns found beside the profile into the library's documentation/ and images/ folders.
+# (Subfolders don't work: Blueprint only looks next to the .xml.)
 PKG = HERE / "blueprint-import"
 
 
@@ -104,6 +106,7 @@ def head(model, locks):
         Lock state is only ever set from what Kwikset reports, never assumed from a button press.
 
         ====================== Change Log ==================
+        Version: 1.1.7 Change: Import fix. The profile, Documentation tab page and icon now sit side by side in profile/blueprint-import, which is where Blueprint looks for them; in 1.1.2-1.1.6 they were in subfolders, so a fresh import got no icon and no Documentation tab.
         Version: 1.1.6 Change: First public release, as HaloKey (the profile, service and halolink command keep the HaloLink name). Search aliases (Kwikset, Halo, Halo Touch, Halo Select, ...) so the profile is easy to find in Blueprint. Supported-lock list corrected: Bluetooth-only Aura locks are not supported.
         Version: 1.1.5 Change: Manual screenshots. The Documentation tab is the full user manual (MANUAL.md), and the profile ships only in profile/blueprint-import.
         Version: 1.1.4 Change: Full lock and unlock control by default. New "Disable Unlock" state variable (YES = lock only) and SYS_UNLOCK_ALLOWED. Door Lock data table: Status State is DoorLockStatus_n (the 1.1.1-1.1.3 notes said IsDoorLocked_n, which the Savant app reads as Unlocked). New DoorLockError_n for Error State. Commands sent by the bridge show LOCKn_LAST_SOURCE = Savant.
@@ -303,9 +306,9 @@ def build(locks, test=False):
 # as data: URIs, so the page is one self-contained file. The page is ASCII: other characters
 # become &#...; references.
 
-OUT = PKG / "componentProfiles" / profile_filename(MANUFACTURER, MODEL)
-DOC = PKG / "documentation" / OUT.with_suffix(".htm").name
-ICON = PKG / "images" / OUT.with_suffix(".icns").name
+OUT = PKG / profile_filename(MANUFACTURER, MODEL)
+DOC = OUT.with_suffix(".htm")
+ICON = OUT.with_suffix(".icns")
 IMAGES = ROOT / "docs" / "images"
 DOC_IMAGE_WIDTH = 900  # px; screenshots are scaled down to this for the embedded copies
 

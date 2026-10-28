@@ -12,6 +12,6 @@ for s in 16 32 128 256 512; do
   sips -z $s $s "$PNG" --out "$SET/icon_${s}x${s}.png" >/dev/null
   sips -z $((s*2)) $((s*2)) "$PNG" --out "$SET/icon_${s}x${s}@2x.png" >/dev/null
 done
-mkdir -p "$HERE/blueprint-import/images"
-iconutil -c icns "$SET" -o "$HERE/blueprint-import/images/kwikset_halolink.icns"
-echo "wrote blueprint-import/images/kwikset_halolink.icns"
+mkdir -p "$HERE/blueprint-import"
+iconutil -c icns "$SET" -o "$HERE/blueprint-import/kwikset_halolink.icns"
+echo "wrote blueprint-import/kwikset_halolink.icns"

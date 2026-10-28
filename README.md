@@ -23,7 +23,7 @@ halolink login
 
 Then in Blueprint:
 
-1. Import `profile/blueprint-import/componentProfiles/kwikset_halolink.xml` (keep the file name). Importing from that folder also brings in the icon and the full manual on the component's **Documentation** tab.
+1. Import `profile/blueprint-import/kwikset_halolink.xml` (keep the file name). Blueprint also picks up the icon and the full manual (the component's **Documentation** tab) from the `.icns` and `.htm` beside it, so keep the three files together.
 2. Add **Kwikset HaloLink** (search *Kwikset* or *Halo*) to the layout and set its Ethernet IP to the host.
 3. In the Door Lock data table, add one Lock per lock: address = lock number from `halolink list`, Status State `DoorLockStatus_n`, Error State `DoorLockError_n`.
 4. Upload.
@@ -37,7 +37,7 @@ Then in Blueprint:
 | `MANUAL.pdf`, `MANUAL.md` | User manual |
 | `STATES.md` | Every state |
 | `CHANGELOG.md` | Release history |
-| `profile/blueprint-import/` | Import from here: Blueprint profile, Documentation tab page, icon |
+| `profile/blueprint-import/` | Import from here: Blueprint profile (`.xml`), Documentation tab page (`.htm`) and icon (`.icns`), side by side |
 | `profile/` | Profile generator and icon source |
 | `bridge/` | Bridge service and default config |
 | `macos/` | Installer, uninstaller, `halolink` control command |

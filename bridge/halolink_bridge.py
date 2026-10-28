@@ -41,7 +41,7 @@ import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-VERSION = "1.1.6"
+VERSION = "1.1.7"
 log = logging.getLogger("halolink")
 
 # Savant decodes profile traffic as Mac Roman; keep everything plain ASCII.

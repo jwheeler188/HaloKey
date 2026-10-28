@@ -1,6 +1,6 @@
 # HaloKey — User Manual
 
-**Version 1.1.6** · Kwikset Halo Wi-Fi smart locks in Savant: lock and unlock from the Savant app, live status, battery, and who locked or unlocked the door.
+**Version 1.1.7** · Kwikset Halo Wi-Fi smart locks in Savant: lock and unlock from the Savant app, live status, battery, and who locked or unlocked the door.
 
 *HaloKey is an independent community project. It is not affiliated with, endorsed by, or supported by Kwikset or Savant Systems, Inc. "Savant" and "Kwikset" are trademarks of their owners. Released under the MIT License.*
 
@@ -75,7 +75,7 @@ halolink list
 
 Then in Blueprint:
 
-1. Import `profile/blueprint-import/componentProfiles/kwikset_halolink.xml` (keep the file name).
+1. Import `profile/blueprint-import/kwikset_halolink.xml` (keep the file name).
 2. Add **Kwikset HaloLink** to the layout and set its Ethernet IP to the host.
 3. In the Door Lock data table, add one Lock per lock: address = the lock number, Status State `DoorLockStatus_n`, Error State `DoorLockError_n`.
 4. Upload.
@@ -157,7 +157,7 @@ Savant refers to locks **by these numbers**: `LOCK2_STATUS`, `LockDoor2`, Door L
 
 ## 8. Adding the profile in Blueprint
 
-1. In Blueprint's component library, **Import** `profile/blueprint-import/componentProfiles/kwikset_halolink.xml`. Import it from that folder: Blueprint copies this manual (the component's **Documentation** tab) and the component icon from the `documentation` and `images` folders beside it. Copying those files into the library by hand doesn't enable the Documentation tab.
+1. In Blueprint's component library, **Import** `profile/blueprint-import/kwikset_halolink.xml`. The folder holds three files with the same name: the profile (`.xml`), this manual as the component's **Documentation** tab (`.htm`) and the component icon (`.icns`). Blueprint copies the `.htm` and `.icns` it finds beside the profile into your library, so import from that folder and keep the three files together.
    - **Keep the file name exactly as shipped.** Blueprint finds profiles by manufacturer and model. A renamed copy, such as `kwikset_halolink (1).xml`, imports but then fails with "Component not found."
    - When upgrading, import the new version the same way. Every release that changes the profile raises its version, so Blueprint replaces the old one cleanly.
 2. Search the library for *Kwikset*, *Halo* or *HaloKey* (*Halo Touch*, *Halo Select*, *Smart Lock* and *Deadbolt* work too) and drag **Kwikset HaloLink** into the layout. It's added as **Door Lock Controller**; rename it if you like. Connect its **Ethernet** port to the network, as you would any IP device.
@@ -308,7 +308,7 @@ Logs: `~/HaloLink/logs/bridge.log` (rotated, 3 × 1 MB).
 | A lock shows *Unknown* / `LOCKn_ONLINE = 0` | The Kwikset app shows the same lock offline. Low batteries are the usual cause |
 | A lock is missing | `halolink list`. Check the `home` filter and the *Kwikset Home* variable. More than `max_locks` locks? |
 | Profile shows nothing | The Ethernet IP must be the bridge machine's. Run `halolink status` and check that port 2370 is listening. If the bridge runs on a separate machine, check `allowed_clients` and look for "refused connection" in `halolink logs` |
-| The Documentation tab is greyed out | Import the profile from `profile/blueprint-import/componentProfiles/` (section 8) |
+| The Documentation tab is greyed out, or the icon is a *?* | Import the profile from `profile/blueprint-import/`, with `kwikset_halolink.htm` and `.icns` beside it (section 8). A component added before the icon was in the library keeps the *?*: remove it and add it again |
 | Import or "Component not found" problems | Build the 5-state test profile with `generate_profile.py --test` and import `profile/kwikset_halolinktest.xml`, to tell a profile-structure problem from a content problem |
 | A state looks wrong (door, online) | Run `halolink dump <n>` and look at the raw fields. Kwikset's field names can vary by model and firmware |
 
@@ -332,8 +332,8 @@ Logs: `~/HaloLink/logs/bridge.log` (rotated, 3 × 1 MB).
 bridge/halolink_bridge.py     the bridge (single file, asyncio)
 bridge/config.json            default settings
 profile/generate_profile.py   builds the Blueprint profile, the Documentation tab page and STATES.md
-profile/blueprint-import/     Blueprint import layout: componentProfiles/, documentation/, images/
-profile/icon.svg              icon source; make_icon.sh builds images/kwikset_halolink.icns (macOS)
+profile/blueprint-import/     import package: kwikset_halolink .xml (profile), .htm (Documentation tab), .icns (icon)
+profile/icon.svg              icon source; make_icon.sh builds blueprint-import/kwikset_halolink.icns (macOS)
 macos/                        install.sh, uninstall.sh, halolink control command
 linux/                        systemd unit and setup steps
 vendor/                       Python 3.9-compatible aiokwikset wheel and the script that makes it

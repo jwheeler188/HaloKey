@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.7
+
+- **Import fix:** the Blueprint profile, its Documentation tab page and its icon now sit side by side in `profile/blueprint-import/` (`kwikset_halolink.xml`, `.htm`, `.icns`). Blueprint only picks up the page and icon from beside the profile, so with 1.1.6's subfolders a fresh import had no icon and a greyed-out Documentation tab.
+
 ## 1.1.6 — first public release
 
 HaloKey (developed as HaloLink): Kwikset Halo Wi-Fi smart locks in Savant, through a small bridge service on the Savant host.
@@ -15,6 +19,6 @@ HaloKey (developed as HaloLink): Kwikset Halo Wi-Fi smart locks in Savant, throu
 - Python 3.9-compatible build of aiokwikset 0.7.3 bundled for the Mac host.
 - Released as **HaloKey**. The Blueprint profile (Kwikset HaloLink), bridge service, `halolink` command and `~/HaloLink` folder keep the original name.
 - Search aliases in the profile (HaloKey, Kwikset, Halo, Halo Touch, Halo Select, Smart Lock, Deadbolt, ...), so it's easy to find in Blueprint's component search. It adds as **Door Lock Controller**.
-- The Blueprint profile ships in Blueprint's import layout, `profile/blueprint-import/`, with this manual on the component's **Documentation** tab and a component icon.
+- The Blueprint profile ships in `profile/blueprint-import/`, with this manual on the component's **Documentation** tab and a component icon.
 
 Tested with the original Kwikset Halo Touchscreen Wi-Fi Smart Lock (HALO-01) on a Savant Mac mini Pro host and the Savant Pro app. Pre-release builds (1.1.0–1.1.5) were tested privately.

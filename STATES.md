@@ -1,4 +1,4 @@
-# HaloKey states (v1.1.6)
+# HaloKey states (v1.1.7)
 
 Every state the bridge sends. n = lock number (1 to max_locks) from `halolink list`.
 

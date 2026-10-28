@@ -111,7 +111,7 @@ class FakeAPI:
 
 def profile_commands():
     """Every action in the generated profile -> the exact line Savant would send."""
-    r = ET.parse(str(__import__("pathlib").Path(__file__).resolve().parent.parent / "profile" / "blueprint-import" / "componentProfiles" / "kwikset_halolink.xml")).getroot()
+    r = ET.parse(str(__import__("pathlib").Path(__file__).resolve().parent.parent / "profile" / "blueprint-import" / "kwikset_halolink.xml")).getroot()
     sample = {"Lock": "2", "DoorLockAddress": "1", "State": "ON", "Seconds": "60"}
     svars = {"Kwikset Home": "", "Disable Unlock": ""}
     out = []
